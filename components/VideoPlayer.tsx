@@ -771,7 +771,7 @@ export default function VideoPlayer({ movieId, movieLink, user, onStatusChange }
         >
           <video
             ref={videoRef}
-            className="w-full h-full max-h-[100dvh] object-contain cursor-pointer"
+            className="w-full aspect-[4/3] sm:aspect-video object-cover sm:object-contain cursor-pointer"
             onClick={handlePlayPause}
               onPlay={() => {
                 // Only sync if this was a user action, not a programmatic play

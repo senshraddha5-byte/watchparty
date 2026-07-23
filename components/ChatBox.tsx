@@ -24,7 +24,6 @@ export default function ChatBox({ user, theme = 'blue', syncStatus = '' }: ChatB
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [replyTo, setReplyTo] = useState<string | null>(null);
-  const [isTyping, setIsTyping] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -84,14 +83,6 @@ export default function ChatBox({ user, theme = 'blue', syncStatus = '' }: ChatB
     setShowScrollButton(false);
   };
 
-  // Simulate typing indicator
-  useEffect(() => {
-    const checkTyping = () => {
-      setIsTyping(Math.random() > 0.7);
-    };
-    const interval = setInterval(checkTyping, 3000);
-    return () => clearInterval(interval);
-  }, []);
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -228,18 +219,6 @@ export default function ChatBox({ user, theme = 'blue', syncStatus = '' }: ChatB
           ))
         )}
 
-        {/* Typing indicator */}
-        {isTyping && (
-          <div className="flex justify-start">
-            <div className="bg-gray-200 dark:bg-gray-700 rounded-2xl px-4 py-2">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div ref={messagesEndRef} />
       </div>

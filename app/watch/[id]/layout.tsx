@@ -82,6 +82,28 @@ export default function WatchLayout({ children, params }: WatchLayoutProps) {
     fetchMovie();
   }, [movieId]);
 
+  // Handle Visual Viewport API to fix mobile keyboard pushing the layout up
+  useEffect(() => {
+    const updateViewport = () => {
+      const vv = window.visualViewport;
+      if (!vv) return;
+      document.documentElement.style.setProperty('--vv-height', `${vv.height}px`);
+      document.documentElement.style.setProperty('--vv-offset-top', `${vv.offsetTop}px`);
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateViewport);
+      window.visualViewport.addEventListener('scroll', updateViewport);
+      updateViewport();
+    }
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateViewport);
+        window.visualViewport.removeEventListener('scroll', updateViewport);
+      }
+    };
+  }, []);
+
   // Show user modal first
   if (showUserModal) {
     return (
@@ -122,7 +144,13 @@ export default function WatchLayout({ children, params }: WatchLayoutProps) {
   }
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-gray-900 overflow-hidden">
+    <div 
+      className="flex flex-col bg-gray-900 overflow-hidden absolute w-full left-0 right-0"
+      style={{
+        height: 'var(--vv-height, 100dvh)',
+        top: 'var(--vv-offset-top, 0px)'
+      }}
+    >
       {/* Header */}
       <header className={`bg-gray-900 text-white shadow-lg border-b-4 shrink-0 z-20 relative ${isOlivia ? 'border-pink-500' : 'border-blue-500'}`}>
         <div className="max-w-7xl mx-auto px-4 py-3">
@@ -175,14 +203,6 @@ export default function WatchLayout({ children, params }: WatchLayoutProps) {
 
       {/* Scrollable Content Area (Chat & Description) */}
       <div className="flex-1 overflow-y-auto flex flex-col relative">
-        {/* Movie Description */}
-        {movie?.description && (
-          <div className="bg-gray-800 px-4 py-3 border-b border-gray-700 shrink-0">
-            <p className="text-gray-300 text-sm">
-              {movie.description}
-            </p>
-          </div>
-        )}
 
         {/* Chat Area */}
         <div className="flex-1 w-full max-w-2xl mx-auto px-2 sm:px-4 py-2 sm:py-4 flex flex-col min-h-0">

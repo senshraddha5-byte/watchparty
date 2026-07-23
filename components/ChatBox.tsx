@@ -107,9 +107,8 @@ export default function ChatBox({ user, theme = 'blue' }: ChatBoxProps) {
       });
 
       if (response.ok) {
-        const newMsg = await response.json();
-        // Add new message directly to the messages array
-        setMessages(prev => [...prev, newMsg]);
+        // We don't need to manually update state here
+        // The Firebase onSnapshot listener will automatically pick up the new message
       }
 
       setNewMessage('');
@@ -133,12 +132,7 @@ export default function ChatBox({ user, theme = 'blue' }: ChatBoxProps) {
       });
 
       if (response.ok) {
-        // Update the message in local state
-        setMessages(prev => prev.map(msg => 
-          msg.id === messageId 
-            ? { ...msg, text: newText, edited: true }
-            : msg
-        ));
+        // State is updated automatically by Firebase onSnapshot
       }
     } catch (error) {
       console.error('Error editing message:', error);
@@ -152,8 +146,7 @@ export default function ChatBox({ user, theme = 'blue' }: ChatBoxProps) {
       });
 
       if (response.ok) {
-        // Remove the message from local state
-        setMessages(prev => prev.filter(msg => msg.id !== messageId));
+        // State is updated automatically by Firebase onSnapshot
       }
     } catch (error) {
       console.error('Error deleting message:', error);

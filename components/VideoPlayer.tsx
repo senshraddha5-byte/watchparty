@@ -743,19 +743,18 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
 
   if (!isIframe) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-0 w-full h-full flex flex-col justify-center bg-black">
         <div 
           ref={videoContainerRef}
-          className="relative bg-black rounded-xl overflow-hidden shadow-2xl max-w-4xl mx-auto group"
+          className="relative bg-black w-full mx-auto group flex items-center justify-center h-full max-h-full"
           onMouseMove={handleUserInteraction}
           onClick={handleUserInteraction}
           onTouchStart={handleUserInteraction}
         >
-          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-            <video
-              ref={videoRef}
-              className="absolute top-0 left-0 w-full h-full cursor-pointer"
-              onClick={handlePlayPause}
+          <video
+            ref={videoRef}
+            className="w-full h-full max-h-[100dvh] object-contain cursor-pointer"
+            onClick={handlePlayPause}
               onPlay={() => {
                 // Only sync if this was a user action, not a programmatic play
                 if (!localStateRef.current.isPlaying && !isWaitingForSyncRef.current) {
@@ -878,7 +877,6 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
                 </div>
               </div>
             )}
-          </div>
         </div>
         
         {/* Current synced state */}

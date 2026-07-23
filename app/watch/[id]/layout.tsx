@@ -122,9 +122,9 @@ export default function WatchLayout({ children, params }: WatchLayoutProps) {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900 overflow-hidden">
+    <div className="h-[100dvh] flex flex-col bg-gray-900 overflow-hidden">
       {/* Header */}
-      <header className={`bg-gray-900 text-white shadow-lg border-b-4 shrink-0 ${isOlivia ? 'border-pink-500' : 'border-blue-500'}`}>
+      <header className={`bg-gray-900 text-white shadow-lg border-b-4 shrink-0 z-20 relative ${isOlivia ? 'border-pink-500' : 'border-blue-500'}`}>
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -164,17 +164,17 @@ export default function WatchLayout({ children, params }: WatchLayoutProps) {
         </div>
       </header>
 
-      {/* Scrollable Content Area */}
-      <div className="flex-1 overflow-y-auto flex flex-col">
-        {/* Video Player */}
-        <div className="w-full bg-black shrink-0">
-          <VideoPlayer
-            movieId={movieId}
-            movieLink={movieLink}
-            user={selectedUser || 'kumar'}
-          />
-        </div>
+      {/* Video Player - Pinned to the top so it doesn't scroll away when keyboard opens */}
+      <div className="w-full bg-black shrink-0 z-10 relative">
+        <VideoPlayer
+          movieId={movieId}
+          movieLink={movieLink}
+          user={selectedUser || 'kumar'}
+        />
+      </div>
 
+      {/* Scrollable Content Area (Chat & Description) */}
+      <div className="flex-1 overflow-y-auto flex flex-col relative">
         {/* Movie Description */}
         {movie?.description && (
           <div className="bg-gray-800 px-4 py-3 border-b border-gray-700 shrink-0">
@@ -185,7 +185,7 @@ export default function WatchLayout({ children, params }: WatchLayoutProps) {
         )}
 
         {/* Chat Area */}
-        <div className="flex-1 w-full max-w-2xl mx-auto px-4 py-4 min-h-[400px]">
+        <div className="flex-1 w-full max-w-2xl mx-auto px-2 sm:px-4 py-2 sm:py-4 flex flex-col min-h-0">
           <ChatBox user={selectedUser || 'kumar'} theme={themeColor} />
         </div>
       </div>

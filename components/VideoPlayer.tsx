@@ -195,6 +195,10 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
   
   const [isSkipModalOpen, setIsSkipModalOpen] = useState(false);
   const [skipTimeInput, setSkipTimeInput] = useState('');
+  
+  const [showControls, setShowControls] = useState(false);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
 
   // Convert URL to embed format
   useEffect(() => {
@@ -652,8 +656,33 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
       ? `${userName} is playing` 
       : `${userName} paused`;
   };
-
   // Custom Controls Handlers
+  const handleUserInteraction = () => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 3000);
+  };
+
+  const handleFullscreen = () => {
+    if (!videoContainerRef.current) return;
+    const elem = videoContainerRef.current as any;
+    
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(e => console.log('Exit fullscreen error:', e));
+    } else {
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
+    }
+  };
   const handlePlayPause = () => {
     if (!videoRef.current) return;
     if (videoRef.current.paused) {
@@ -715,7 +744,13 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
   if (!isIframe) {
     return (
       <div className="space-y-2">
-        <div className="relative bg-black rounded-xl overflow-hidden shadow-2xl max-w-4xl mx-auto group">
+        <div 
+          ref={videoContainerRef}
+          className="relative bg-black rounded-xl overflow-hidden shadow-2xl max-w-4xl mx-auto group"
+          onMouseMove={handleUserInteraction}
+          onClick={handleUserInteraction}
+          onTouchStart={handleUserInteraction}
+        >
           <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
             <video
               ref={videoRef}
@@ -759,10 +794,10 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
               Your browser does not support the video tag.
             </video>
             
-            {/* Custom Control Bar (appears on hover) */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+            {/* Custom Control Bar */}
+            <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 flex items-center justify-center gap-2 sm:gap-4 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
               <button 
-                onClick={() => handleSkip(-10)} 
+                onClick={(e) => { e.stopPropagation(); handleSkip(-10); }} 
                 className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 w-10 h-10 flex items-center justify-center backdrop-blur-sm transition-colors"
                 title="Rewind 10s"
               >
@@ -770,7 +805,7 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
               </button>
               
               <button 
-                onClick={handlePlayPause} 
+                onClick={(e) => { e.stopPropagation(); handlePlayPause(); }} 
                 className="bg-white hover:bg-gray-200 text-black rounded-full p-3 w-14 h-14 flex items-center justify-center transition-transform hover:scale-105 shadow-lg"
               >
                 {localStateRef.current.isPlaying ? (
@@ -781,20 +816,30 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
               </button>
 
               <button 
-                onClick={() => handleSkip(10)} 
+                onClick={(e) => { e.stopPropagation(); handleSkip(10); }} 
                 className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 w-10 h-10 flex items-center justify-center backdrop-blur-sm transition-colors"
                 title="Forward 10s"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
               </button>
 
-              <button
-                onClick={() => setIsSkipModalOpen(true)}
-                className="ml-auto bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-sm backdrop-blur-sm transition-colors flex items-center gap-2"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Skip to Time
-              </button>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  onClick={(e) => { e.stopPropagation(); setIsSkipModalOpen(true); }}
+                  className="bg-white/20 hover:bg-white/30 text-white px-2 py-1.5 sm:px-3 rounded-lg text-xs sm:text-sm backdrop-blur-sm transition-colors flex items-center gap-1 sm:gap-2"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span className="hidden sm:inline">Skip to Time</span>
+                </button>
+
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleFullscreen(); }}
+                  className="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg backdrop-blur-sm transition-colors"
+                  title="Fullscreen"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                </button>
+              </div>
             </div>
 
             {/* Skip to Time Modal */}

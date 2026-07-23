@@ -17,9 +17,10 @@ interface Message {
 interface ChatBoxProps {
   user: string;
   theme?: 'pink' | 'blue';
+  syncStatus?: string;
 }
 
-export default function ChatBox({ user, theme = 'blue' }: ChatBoxProps) {
+export default function ChatBox({ user, theme = 'blue', syncStatus = '' }: ChatBoxProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [replyTo, setReplyTo] = useState<string | null>(null);
@@ -183,8 +184,7 @@ export default function ChatBox({ user, theme = 'blue' }: ChatBoxProps) {
       <div className={`px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r ${headerGradient}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xl">💬</span>
-            <h3 className="font-bold text-white text-base">Chat</h3>
+            <h3 className="font-bold text-white text-base truncate max-w-[200px] sm:max-w-xs">{syncStatus || 'Watch Party Chat'}</h3>
           </div>
           <button
             onClick={refreshMessages}

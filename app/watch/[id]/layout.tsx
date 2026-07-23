@@ -41,6 +41,7 @@ export default function WatchLayout({ children, params }: WatchLayoutProps) {
   const [showUserModal, setShowUserModal] = useState(true);
   const [movieId, setMovieId] = useState<string>('');
   const [movieLink, setMovieLink] = useState<string>('');
+  const [syncStatus, setSyncStatus] = useState<string>('');
 
   // Get movie ID from params
   useEffect(() => {
@@ -151,53 +152,13 @@ export default function WatchLayout({ children, params }: WatchLayoutProps) {
         top: 'var(--vv-offset-top, 0px)'
       }}
     >
-      {/* Header */}
-      <header className={`bg-gray-900 text-white shadow-lg border-b-4 shrink-0 z-20 relative ${isOlivia ? 'border-pink-500' : 'border-blue-500'}`}>
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link
-                href="/"
-                className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-                title="Back to Library"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </Link>
-              <div>
-                <h1 className="text-lg font-bold truncate max-w-[200px] md:max-w-none">
-                  {movie?.name || 'Loading...'}
-                </h1>
-                <p className="text-gray-400 text-xs">
-                  Zivic Theatre
-                </p>
-              </div>
-            </div>
-
-            {movie?.imdb && (
-              <a
-                href={movie.imdb}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-sm"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M14.5 3h-5v5h5v-5zM19.5 8h-5v5h5v-5zM3 3h5v5H3V3zm0 5h5v11H3V8zm16.5 0h5v11h-5V8z"/>
-                </svg>
-                IMDb
-              </a>
-            )}
-          </div>
-        </div>
-      </header>
-
       {/* Video Player - Pinned to the top so it doesn't scroll away when keyboard opens */}
-      <div className="w-full bg-black shrink-0 z-10 relative">
+      <div className={`w-full bg-black shrink-0 z-10 relative border-b-4 ${isOlivia ? 'border-pink-500' : 'border-blue-500'}`}>
         <VideoPlayer
           movieId={movieId}
           movieLink={movieLink}
           user={selectedUser || 'kumar'}
+          onStatusChange={setSyncStatus}
         />
       </div>
 
@@ -206,7 +167,7 @@ export default function WatchLayout({ children, params }: WatchLayoutProps) {
 
         {/* Chat Area */}
         <div className="flex-1 w-full max-w-2xl mx-auto px-2 sm:px-4 py-2 sm:py-4 flex flex-col min-h-0">
-          <ChatBox user={selectedUser || 'kumar'} theme={themeColor} />
+          <ChatBox user={selectedUser || 'kumar'} theme={themeColor} syncStatus={syncStatus} />
         </div>
       </div>
     </div>

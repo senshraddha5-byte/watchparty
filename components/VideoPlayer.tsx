@@ -8,6 +8,7 @@ interface VideoPlayerProps {
   movieId: string;
   movieLink: string | null;
   user: string;
+  onStatusChange?: (status: string) => void;
 }
 
 interface PlaybackState {
@@ -165,7 +166,7 @@ const formatTime = (seconds: number): string => {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
-export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
+export default function VideoPlayer({ movieId, movieLink, user, onStatusChange }: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
   const vkPlayerRef = useRef<VKVideoPlayer | null>(null);
@@ -185,7 +186,24 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
   const localStateRef = useRef<PlaybackState>(localState);
   useEffect(() => {
     localStateRef.current = localState;
-  }, [localState]);
+    if (onStatusChange) {
+      let desc = '';
+      if (localState.lastUpdatedBy) {
+        if (localState.isBuffering && localState.lastUpdatedBy !== user) {
+          desc = `${localState.lastUpdatedBy.charAt(0).toUpperCase() + localState.lastUpdatedBy.slice(1)} buffering...`;
+        } else {
+          const isMe = localState.lastUpdatedBy === user;
+          const userName = isMe ? 'You' : (localState.lastUpdatedBy.charAt(0).toUpperCase() + localState.lastUpdatedBy.slice(1));
+          if (localState.action) {
+            desc = `${userName} ${localState.action}`;
+          } else {
+            desc = localState.isPlaying ? `${userName} is playing` : `${userName} paused`;
+          }
+        }
+      }
+      onStatusChange(desc);
+    }
+  }, [localState, onStatusChange, user]);
   const [isSyncing, setIsSyncing] = useState(false);
   const isWaitingForSyncRef = useRef(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
@@ -795,6 +813,17 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
             
             {/* Custom Control Bar */}
             <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 flex items-center justify-center gap-2 sm:gap-4 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
+              <div className="mr-auto">
+                <button
+                  onClick={(e) => { e.stopPropagation(); window.location.href = '/'; }}
+                  className="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg backdrop-blur-sm transition-colors flex items-center justify-center"
+                  title="Back to Library"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              </div>
               <button 
                 onClick={(e) => { e.stopPropagation(); handleSkip(-10); }} 
                 className="bg-white/20 hover:bg-white/30 text-white rounded-full p-2 w-10 h-10 flex items-center justify-center backdrop-blur-sm transition-colors"
@@ -879,14 +908,7 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
             )}
         </div>
         
-        {/* Current synced state */}
-        {localStateRef.current.lastUpdatedBy && (
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 max-w-4xl mx-auto text-center text-sm text-gray-500 dark:text-gray-400">
-            {localStateRef.current.isBuffering && localStateRef.current.lastUpdatedBy !== user 
-              ? `${localStateRef.current.lastUpdatedBy.charAt(0).toUpperCase() + localStateRef.current.lastUpdatedBy.slice(1)} buffering...` 
-              : getActionDescription()}
-          </div>
-        )}
+
       </div>
     );
   }
@@ -955,14 +977,7 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
             </div>
           </div>
           
-          {/* Current synced state */}
-          {localStateRef.current.lastUpdatedBy && (
-            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-              <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-                {getActionDescription()}
-              </div>
-            </div>
-          )}
+
         </div>
       </div>
     );
@@ -979,12 +994,7 @@ export default function VideoPlayer({ movieLink, user }: VideoPlayerProps) {
 
       </div>
       
-      {/* Status below video */}
-      {localStateRef.current.lastUpdatedBy && (
-        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          {getActionDescription()}
-        </div>
-      )}
+
     </div>
   );
 }
